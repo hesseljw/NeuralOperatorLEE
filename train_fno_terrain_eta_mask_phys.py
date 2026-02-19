@@ -1,17 +1,27 @@
-# fno_terrain_complex_eta_mask_coords_phys.py
-# Physics-informed FNO for terrain → complex pressure (or residual Δp).
-#
-# Key idea:
-# - Train on normalized targets for stable optimization
-# - Compute physics residuals on *physical pressure* p (de-normalized) to avoid affine-normalization biasing Helmholtz.
-#
-# Inputs  (4,H,W): [eta_norm, air_mask, x_norm, z_norm]
-# Targets (2,H,W): [p_re, p_im] if use_flat_residual=False
-#                : [Δp_re, Δp_im] where Δp = p_terrain - p_flat if use_flat_residual=True
-# Reconstruction (if residual): p_pred = Δp_pred + p_flat
+"""
+Train a Fourier Neural Operator (FNO) surrogate for terrain-only outdoor acoustics (LEE data).
+
+Inputs (ROI grid channels):
+- η = (z - h(x)) normalized
+- air mask (1 in air, 0 in ground)
+- x_norm, z_norm
+
+Target:
+- residual complex pressure Δp(x,z)=p_terrain(x,z)-p_flat(x,z) (reconstructed as p = p_flat + Δp)
+
+Loss/metrics are masked to the air region (z >= h(x)). This script can also include optional physics-inspired terms.
+
+Outputs are saved under runs/<RUN_TAG>/ (checkpoints, metrics, eval summaries).
+
+Quickstart:
+  python train_fno_terrain_eta_mask_phys.py --data-root <DATA_DIR> --iid --device cuda
+"""
 
 from __future__ import annotations
-import json, time, random, math
+import json
+import time
+import random
+import math
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional
 
@@ -23,7 +33,12 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 
-# ------------------------------ User toggles ------------------------------
+# =============================================================================
+# USER CONFIG
+# =============================================================================
+# Edit the values below for your machine / experiment. You can also override many
+# of them via command-line flags (see --help).
+
 DATA_ROOT = Path("data") / "terrain_sobol_complex_n_1000"
 DEVICE    = None   # "cuda" or "cpu" (if None, auto-pick)
 RUN_TAG   = "fno_phys_iid"    # checkpoints/<RUN_TAG>.pt, checkpoints/<RUN_TAG>_last.pt

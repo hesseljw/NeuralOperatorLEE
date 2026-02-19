@@ -1,20 +1,24 @@
-# -*- coding: utf-8 -*-
-# deeponet_terrain_complex_eta_fourier_flatres_deterministic_val.py
-#
-# WORKING version (fixes ALL the issues you hit):
-#  1) 4D vs 5D torch.cat crash  -> eta construction now GUARANTEES (B,H,W)
-#  2) cuFFT half precision power-of-two crash under AMP -> FFT forced to FP32 (autocast disabled inside FFT)
-#  3) GradScaler crash with ComplexFloat params -> auto-disables GradScaler when complex params exist (autocast-only)
-#
-# + RESUME SUPPORT (NEW):
-#  - automatically resumes from checkpoints/{run_tag}_last.pt if present
-#  - restores model/optimizer/scheduler/(scaler if enabled) + RNG state for deterministic resume
-#
-# Model: DeepONet-style = branch(h sensors) + GRID trunk (FNO-like spectral mixing) + dot-product merge
-# Target: ?p = p_terrain - p_flat (re/im), loss masked to AIR only (z >= h(x))
+"""
+Train a DeepONet-style surrogate for terrain-only outdoor acoustics (LEE data).
+
+Model: branch network encodes terrain h(x) via sensors; trunk uses grid coordinates (x,z) with optional η=z-h(x)
+and Fourier features, merged via a dot-product to predict complex pressure on the ROI grid.
+
+Target:
+- residual Δp(x,z)=p_terrain(x,z)-p_flat(x,z) (reconstructed as p = p_flat + Δp)
+Loss/metrics are masked to the air region (z >= h(x)).
+
+Outputs are saved under runs/<RUN_TAG>/ (checkpoints, metrics, eval summaries).
+
+Quickstart:
+  python train_deeponet_terrain_eta_fourier.py --data-root <DATA_DIR> --iid --device cuda
+"""
 
 from __future__ import annotations
-import json, time, random, math
+import json
+import time
+import random
+import math
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional
 
@@ -25,7 +29,12 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 
-# ------------------------------ User toggles ------------------------------
+# =============================================================================
+# USER CONFIG
+# =============================================================================
+# Edit the values below for your machine / experiment. You can also override many
+# of them via command-line flags (see --help).
+
 DATA_ROOT = "data/terrain_sobol_complex_n_1000"
 DEVICE    = None  # "cuda" or "cpu" (if None auto)
 RUN_TAG   = "deeponet_gridtrunk_fno_learn_p_iid"
@@ -34,7 +43,7 @@ RUN_IID        = True
 RUN_LOFO_ALL   = False
 RUN_RANGE_OOD  = False
 
-# ------------------------------ Resume toggles (NEW) ------------------------------
+# ------------------------------ Resume toggles ------------------------------
 RESUME_TRAINING = True          # if True, resume from *_last.pt when available
 RESUME_FROM_BEST = False        # if True, resume from best checkpoint instead of last (usually keep False)
 

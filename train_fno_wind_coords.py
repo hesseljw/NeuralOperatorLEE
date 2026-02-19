@@ -1,10 +1,20 @@
-# fno_wind_complex_u_coords_p_or_delta.py
-# Train an FNO to map WIND profile (broadcast to ROI grid) + coords -> complex pressure p(z,x)
-# or residual \Delta p(z,x) = p(z,x;U) - p0(z,x;U=0) (flat ground, no wind).
+"""
+Train a Fourier Neural Operator (FNO) surrogate for wind-only outdoor acoustics (LEE data).
+
+Model: grid-to-grid FNO that consumes coordinate features (and optional wind features) on the ROI grid and predicts
+complex pressure (or residual Δp) on the same grid.
+
+Outputs are saved under runs/<RUN_TAG>/ (checkpoints, metrics, eval summaries).
+
+Quickstart:
+  python train_fno_wind_coords.py --data-root <DATA_DIR> --iid --device cuda
+"""
 
 from __future__ import annotations
 
-import json, time, random
+import json
+import time
+import random
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional
 
@@ -16,7 +26,12 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 
-# ------------------------------ User toggles ------------------------------
+# =============================================================================
+# USER CONFIG
+# =============================================================================
+# Edit the values below for your machine / experiment. You can also override many
+# of them via command-line flags (see --help).
+
 DATA_ROOT = Path("data") / "wind_sobol_complex_n_1000"
 DEVICE    = None   # "cuda" or "cpu" (if None, auto-pick)
 RUN_TAG   = "fno_wind_u_coords_learn_p_iid"

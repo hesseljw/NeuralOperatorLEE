@@ -1,32 +1,25 @@
-# -*- coding: utf-8 -*-
-# deeponet_wind_complex_u_shear_gridtrunk_p_or_delta.py
-#
-# DeepONet (branch = wind profile sensors, trunk = GRID/FNO-like spectral mixing backbone) to map
-#   U(z) (+ optional shear dU/dz)  -> complex pressure field p(z,x)
-# or residual to baseline (no-wind) field:
-#   Δp(z,x) = p(z,x;U) - p0(z,x;U=0)
-#
-# This script is intentionally styled to match the existing code series:
-#   - fno_wind_complex_u_coords_p.py
-#   - deeponet_terrain_complex_eta_fourier_learnp.py
-#   - fno_terrain_complex_eta_mask_coords_learnp.py
-#
-# Key design:
-#   - Branch: MLP on wind sensors (U and optionally dU/dz) -> (B,2*L)
-#   - Trunk: Grid trunk (FNO-like) on (x_norm,z_norm) + optional baseline p0 features -> (B,2*L,H,W)
-#   - Merge: einsum dot product over latent dimension L -> (B,2,H,W)
-#
-# AMP safety:
-#   - FFT is forced to FP32 inside SpectralConv2d (autocast disabled inside that block)
-#   - GradScaler auto-disabled if complex parameters exist (scaler can crash with complex params)
-#
-# Resume:
-#   - resumes from checkpoints/{RUN_TAG}_last.pt (or best if RESUME_FROM_BEST)
-#   - restores optimizer/scheduler/(scaler if enabled) + RNG state
+"""
+Train a DeepONet-style surrogate for wind-only outdoor acoustics (LEE data).
+
+Model: branch network encodes the wind profile U(z); trunk is a grid-based spectral (FNO-like) network over (x,z),
+merged via a dot-product to predict complex pressure on the ROI grid.
+
+Targets:
+- direct complex pressure p(x,z)  OR
+- residual Δp(x,z)=p_wind(x,z)-p_no-wind(x,z) (reconstructed as p = p0 + Δp)
+
+Outputs are saved under runs/<RUN_TAG>/ (checkpoints, metrics, eval summaries).
+
+Quickstart:
+  python train_deeponet_wind_gridtrunk.py --data-root <DATA_DIR> --iid --device cuda
+"""
 
 from __future__ import annotations
 
-import json, time, random, math
+import json
+import time
+import random
+import math
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional
 
@@ -38,7 +31,12 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 
-# ------------------------------ User toggles ------------------------------
+# =============================================================================
+# USER CONFIG
+# =============================================================================
+# Edit the values below for your machine / experiment. You can also override many
+# of them via command-line flags (see --help).
+
 DATA_ROOT = Path("data") / "wind_sobol_complex_n_1000"
 DEVICE    = None  # "cuda" or "cpu" (if None auto)
 RUN_TAG   = "deeponet_wind_gridtrunk_fno_learn_p_iid"

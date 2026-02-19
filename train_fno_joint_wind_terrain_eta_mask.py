@@ -1,3 +1,24 @@
+"""
+Train a joint wind+terrain Fourier Neural Operator (FNO) surrogate (LEE data).
+
+Inputs (ROI grid channels) typically include:
+- wind features (e.g., U(z) broadcast to grid, optionally dU/dz)
+- η = (z - h(x)) normalized
+- air mask
+- x_norm, z_norm
+- optional background flow components if enabled (u_vis, w_vis)
+
+Target:
+- complex pressure p(x,z) OR residual Δp(x,z) depending on the toggle.
+
+Loss/metrics are masked to the air region. Supports subset training for visualization-heavy datasets.
+
+Outputs are saved under runs/<RUN_TAG>/ (checkpoints, metrics, eval summaries).
+
+Quickstart:
+  python train_fno_joint_wind_terrain_eta_mask.py --data-root <DATA_DIR> --iid --device cuda
+"""
+
 """train_fno_wind_terrain_eta_mask.py
 
 FNO surrogate for joint WIND + TERRAIN cases.
@@ -36,7 +57,10 @@ Outputs
 from __future__ import annotations
 from __future__ import annotations
 
-import json, time, random, re
+import json
+import time
+import random
+import re
 import argparse
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional
