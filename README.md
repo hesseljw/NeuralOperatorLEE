@@ -1,110 +1,58 @@
 # NeuralOperatorLEE
 
-Training scripts for **DeepONet** and **Fourier Neural Operator (FNO)** surrogates for outdoor acoustics generated with a **Linearized Euler Equations (LEE) FDTD** solver.
+Neural-operator surrogates for outdoor acoustics generated with a 2D Linearized Euler Equations (LEE) solver.
+This repo contains training scripts for **DeepONet** and **Fourier Neural Operator (FNO)** models on wind-only, terrain-only, and joint wind+terrain cases.
 
-Models learn mappings from
-- parameterized **wind profiles** `U(z)` and/or
-- parameterized **terrain profiles** `h(x)`
-to the **complex harmonic acoustic pressure field** on a fixed 2D ROI grid.
-
-The scripts are aligned with the paper draft:
-**“Towards Neural-operator Surrogates for Outdoor Acoustics using Parameterized Wind Profiles and Terrain.”**
-
----
-
-## What’s in this repo
+## What’s inside
 
 ### Training scripts
+- `train_deeponet_wind_gridtrunk.py`  
+  DeepONet for **wind-only**: branch encodes wind-profile inputs, trunk is a grid/spectral (FNO-like) trunk, predicts complex pressure on the ROI.
 
-All scripts can train either:
-- **direct pressure** `p(x,z)` *(2 channels: Re/Im)*, or
-- **residual pressure** `Δp(x,z)` to a provided baseline *(Re/Im)*.
+- `train_deeponet_terrain_eta_fourier.py`  
+  DeepONet for **terrain-only**: uses terrain parameterization (e.g., η = z − h(x)) and optional Fourier features, supports air-masked loss.
 
-Residual targets are reconstructed as `p_pred = p0 + Δp_pred` (wind / joint) or `p_pred = p_flat + Δp_pred` (terrain).
+- `train_fno_wind_coords.py`  
+  FNO for **wind-only**: grid-to-grid model with coordinate features, predicts complex pressure on the ROI.
 
-> **Where to switch p vs Δp?**  
-> Each script has a **USER CONFIG** block at the top. Flip the indicated boolean to choose the target.  
-> The joint FNO script also exposes a `--direct` CLI flag.
+- `train_fno_terrain_eta_mask_phys.py`  
+  FNO for **terrain-only**: η + air-mask handling (and optional physics-style terms depending on your config), predicts complex pressure on the ROI.
 
-| Script | Setting for **p vs Δp** | Default |
-|---|---|---|
-| `train_deeponet_wind_gridtrunk.py` | `predict_delta` (True → Δp to baseline `p0`) | `False` (direct `p`) |
-| `train_deeponet_terrain_eta_fourier.py` | `use_flat_residual` (True → Δp to `p_flat`) | `True` (Δp) |
-| `train_fno_wind_coords.py` | `predict_delta` (True → Δp to baseline `p0`) | `False` (direct `p`) |
-| `train_fno_terrain_eta_mask_phys.py` | `use_flat_residual` (True → Δp to `p_flat`) | `False` (direct `p`) |
-| `train_fno_joint_wind_terrain_eta_mask.py` | `predict_delta` / `--direct` | `True` (Δp) |
+- `train_fno_joint_wind_terrain_eta_mask.py`  
+  FNO for **wind + terrain** jointly: includes η + air-mask and supports training on a visualization subset if enabled.
 
----
-
-## Masking (terrain + joint)
-
-Terrain cases use an **air mask** to compute loss/metrics only in the air region:
-`Ω_air = {(x,z): z ≥ h(x)}`
-
-This avoids penalizing predictions inside the ground and stabilizes training.
-
----
-
-## Expected data layout
-
-Each dataset root folder is expected to contain:
-
-```
-data/<DATASET_ROOT>/
-  cases/
-    case_000001__u1__t3.h5
-    case_000002__u2__t1.h5
-    ...
-  splits/
-    iid/
-      train.txt
-      val.txt
-      test.txt
-    lofo_wind/ ... (optional)
-    lofo_terrain/ ... (optional)
-    lofo_combo/ ... (optional)
-    range_ood/ ... (optional)
-  fno_aux/ or deeponet_aux/
-    flat_ground.h5          # baseline p0 / p_flat for residual learning (if enabled)
-```
-
-The exact HDF5 keys can differ by dataset, but the scripts expect at least:
-- coordinate grids `x_grid`, `z_grid`
-- complex pressure channels `p_re`, `p_im`
-- wind profile info for wind/joint datasets
-- terrain profile info for terrain/joint datasets
-
----
+### Outputs
+Each script writes a run folder (checkpoints + metrics) under a configurable output directory (see `USER CONFIG` in each file).
 
 ## Quickstart
 
-### Wind-only FNO (direct p)
+
+###  Run a training script
 ```bash
-python train_fno_wind_coords.py --data-root data/wind_sobol_complex_n_1000 --iid --device cuda
+python train_fno_wind_coords.py --data-root /path/to/data --device cuda
+python train_fno_joint_wind_terrain_eta_mask.py --data-root /path/to/data --device cuda
 ```
 
-### Terrain-only FNO (η + mask; direct p by default)
-```bash
-python train_fno_terrain_eta_mask_phys.py --data-root data/terrain_sobol_complex_n_1000 --iid --device cuda
-```
+All scripts also have a **`USER CONFIG`** section at the top (paths, batch size, epochs, model width/modes/layers, etc.).
 
-### Joint FNO (wind + terrain; residual Δp by default)
-```bash
-python train_fno_joint_wind_terrain_eta_mask.py --data-root data/wind_terrain_sobol_complex_perm_n_1000 --iid --device cuda
-```
+## Data availability
 
-To force **direct p** in the joint script:
-```bash
-python train_fno_joint_wind_terrain_eta_mask.py --data-root data/wind_terrain_sobol_complex_perm_n_1000 --iid --device cuda --direct
-```
+The datasets used in the accompanying work are **available by request**.  
+Please contact the author(s) to obtain access and details about the dataset format.
 
----
+## Target choice: `p` vs `Δp`
 
-## Outputs
+All training scripts support predicting either:
+- **direct** complex pressure `p(x,z)` (re/im), or
+- **residual** `Δp(x,z) = p − p_baseline`, with reconstruction `p = p_baseline + Δp`.
 
-Scripts write (by default):
-- `checkpoints/<run_tag>.pt` (best)
-- `checkpoints/<run_tag>__last.pt` (last)
-- `runs/<run_tag>/metrics.csv`
-- `evals/<run_tag>__<split>.json`
+This is controlled by a single boolean/CLI flag in each script (see the `USER CONFIG` block at the top).
 
+## Notes
+
+- Loss/metrics can be **masked to the air region** (`z ≥ h(x)`) for terrain/joint cases.
+- Default hyperparameters are set to reasonable “paper baseline” values but are easy to change.
+
+## Citation
+
+If you use this code in academic work, please cite the associated paper/preprint (TBA). 
