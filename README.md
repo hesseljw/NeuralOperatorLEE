@@ -13,7 +13,7 @@ The scripts are aligned with the accompanying paper draft:
 
 ## What’s in here
 
-### Training scripts (GitHub-ready)
+### Training scripts
 
 | Script | What it trains | Input → Output |
 |---|---|---|
@@ -105,7 +105,7 @@ Scripts write (by default):
 
 ## Notes
 - The scripts assume **PyTorch** and HDF5 (`h5py`).
-- For mixed precision, FFT parts are forced to float32 where needed to avoid cuFFT fp16 limitations (common on some GPUs).
+
 
 ---
 
