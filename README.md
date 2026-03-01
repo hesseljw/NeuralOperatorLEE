@@ -8,7 +8,7 @@ We learn operators that map parameterized wind profiles $U(z)$ and/or terrain pr
 - $G_h: h \mapsto p(x,z)$
 - $G_{U,h}: (U,h) \mapsto p(x,z)$
 
-All models predict two output channels $[p_{\mathrm{re}},\; p_{\mathrm{im}}]$ on the ROI grid; SPL is derived by postprocessing.
+All models predict two output channels $[p_{\mathrm{re}},\, p_{\mathrm{im}}]$ on the ROI grid, SPL is derived by postprocessing.
 
 ---
 
@@ -68,9 +68,9 @@ The fixed baseline $p_0$ can be obtained once from the solver using no-wind $U(z
 
 Input channel conventions (as used in the paper):
 
-- Wind-only: $[U_{\mathrm{norm}},\; \tilde{x},\; \tilde{z}]$
-- Terrain-only: $[\eta_{\mathrm{norm}},\; m,\; \tilde{x},\; \tilde{z}]$
-- Joint wind+terrain: $[U_{\mathrm{norm}},\; \eta_{\mathrm{norm}},\; m,\; \tilde{x},\; \tilde{z}]$
+- Wind-only: $[U_{\mathrm{norm}},\, \tilde{x},\, \tilde{z}]$
+- Terrain-only: $[\eta_{\mathrm{norm}},\, m,\, \tilde{x},\, \tilde{z}]$
+- Joint wind+terrain: $[U_{\mathrm{norm}},\, \eta_{\mathrm{norm}},\, m,\, \tilde{x},\, \tilde{z}]$
 
 ### Scripts
 
@@ -78,7 +78,7 @@ Input channel conventions (as used in the paper):
   Trains $G_U$ (wind-only) using wind-on-grid + normalized coordinate channels.
 
 - `train_fno_terrain_eta_mask.py`  
-  Trains $G_h$ (terrain-only) using $\eta_{\mathrm{norm}}$, air mask $m$, and coordinates; losses/metrics are masked to the air region.
+  Trains $G_h$ (terrain-only) using $\eta_{\mathrm{norm}}$, air mask $m$, and coordinates, losses/metrics are masked to the air region.
 
 - `train_fno_terrain_eta_mask_coords.py`  
   Terrain-only variant (same “house style” as the others), with explicit coordinate channels and the same masking conventions.
