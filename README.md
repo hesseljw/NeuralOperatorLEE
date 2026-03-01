@@ -1,6 +1,6 @@
 # Neural-operator surrogates for outdoor acoustics (LEE–FDTD)
 
-This repository provides training scripts accompanying the paper **“Towards Neural-operator Surrogates for Outdoor Acoustics using Parameterized Wind Profiles and Terrain”** (JASA submission).
+This repository provides training scripts accompanying the paper **“Towards Neural-operator Surrogates for Outdoor Acoustics using Parameterized Wind Profiles and Terrain”** (for JASA submission).
 
 We learn operators that map parameterized **wind profiles** $U(z)$ and/or **terrain profiles** $h(x)$ to **complex acoustic pressure fields** on a fixed 2D region-of-interest (ROI) grid:
 
