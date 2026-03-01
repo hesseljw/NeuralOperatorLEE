@@ -27,7 +27,7 @@ All models predict two output channels $[p_{\mathrm{re}},\, p_{\mathrm{im}}]$ on
 ```
 
 `data_sample/` contains **small HDF5 examples** intended to validate that the pipeline runs end-to-end. They are not intended to reproduce the quantitative results in the manuscript. 
-The full Sobol-sampled HDF5 datasets used to produce the paper results are not included in this repository. They are available from the authors upon reasonable request.
+
 ---
 
 ## Data and representation 
