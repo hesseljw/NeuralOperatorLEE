@@ -1,6 +1,6 @@
 # Neural-operator surrogates for outdoor acoustics (LEE–FDTD)
 
-This repository accompanies the paper “Towards Neural-operator Surrogates for Outdoor Acoustics using Parameterized Wind Profiles and Terrain” (JASA submission; currently under review).
+This repository accompanies the paper “Towards Neural-operator Surrogates for Outdoor Acoustics using Parameterized Wind Profiles and Terrain” (JASA submission, currently under review).
 
 We learn operators that map parameterized wind profiles $U(z)$ and/or terrain profiles $h(x)$ to complex acoustic pressure fields on a fixed 2D region-of-interest (ROI) grid:
 
@@ -8,7 +8,7 @@ We learn operators that map parameterized wind profiles $U(z)$ and/or terrain pr
 - $G_h: h \mapsto p(x,z)$
 - $G_{U,h}: (U,h) \mapsto p(x,z)$
 
-All models predict two output channels $[p_{\mathrm{re}},\; p_{\mathrm{im}}]$ on the ROI grid; SPL is derived by postprocessing.
+All models predict two output channels $[p_{\mathrm{re}},\, p_{\mathrm{im}}]$ on the ROI grid, SPL is derived by postprocessing.
 
 ---
 
@@ -81,10 +81,10 @@ The fixed baseline $p_0$ can be obtained once from the solver using no-wind $U(z
 
 ### DeepONet with grid trunk (FNO-style trunk)
 - `train_deeponet_wind_gridtrunk.py`  
-  Wind-only DeepONet. Branch encodes $U(z)$ via sensors; trunk is a grid-based spectral (FNO-like) network over $(x,z)$.
+  Wind-only DeepONet. Branch encodes $U(z)$ via sensors, trunk is a grid-based spectral (FNO-like) network over $(x,z)$.
 
 - `train_deeponet_terrain_gridtrunk_eta_mask.py`  
-  Terrain-only DeepONet. Branch encodes $h(x)$ via sensors; trunk uses grid coordinates with optional $\eta$ and mask features; outputs are masked to the air region.
+  Terrain-only DeepONet. Branch encodes $h(x)$ via sensors, trunk uses grid coordinates with optional $\eta$ and mask features, outputs are masked to the air region.
 
 ---
 
