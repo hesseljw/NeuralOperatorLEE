@@ -27,7 +27,6 @@ All models predict two output channels $[p_{\mathrm{re}},\, p_{\mathrm{im}}]$ on
     └── sample_joint.h5
 ```
 
-Note: if your terrain DeepONet file is currently named `train_deeponet_terrain_gridtrunk_eta_mask.py.py`, rename it to `train_deeponet_terrain_gridtrunk_eta_mask.py`.
 
 `data_sample/` contains small HDF5 examples intended to validate that the pipeline runs end-to-end. They are not intended to reproduce the quantitative results in the manuscript.
 
