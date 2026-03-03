@@ -912,7 +912,7 @@ def train_run(
             "best_val": best_val,
             "patience_left": patience_left,
 
-            # NEW: RNG states for deterministic resume
+            # RNG states for deterministic resume
             "rng_torch": torch.get_rng_state(),
             "rng_cuda":  torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
             "rng_numpy": np.random.get_state(),
@@ -929,7 +929,7 @@ def train_run(
         }, tmp)
         tmp.replace(path)
 
-    # ------------------------------ Resume (NEW) ------------------------------
+    # ------------------------------ Resume ------------------------------
     if RESUME_TRAINING and resume_path.exists():
         try:
             ckpt = torch.load(resume_path, map_location=device, weights_only=False)
