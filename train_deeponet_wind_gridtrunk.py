@@ -37,7 +37,9 @@ from torch.utils.data import Dataset, DataLoader
 # Edit the values below for your machine / experiment. You can also override many
 # of them via command-line flags (see --help).
 
-DATA_ROOT = Path("data") / "wind_sobol_complex_n_1000"
+# Change this into the real dataset directory
+DATA_ROOT = "data_sample/wind"
+
 DEVICE    = None  # "cuda" or "cpu" (if None auto)
 RUN_TAG   = "deeponet_wind_gridtrunk_fno_learn_p_iid"
 
@@ -98,7 +100,7 @@ CFG: Dict[str, Any] = {
     # If True: learn delta to baseline p0 (flat ground, no wind): Δp = p - p0
     # If False: learn p directly.
     "predict_delta": False,
-    "baseline_file": "deeponet_aux/flat_ground.h5",  # relative to DATA_ROOT
+    "baseline_file": "flat_ground.h5",  # relative to DATA_ROOT
 
     # ---- Trunk input features ----
     # Strong analogue to terrain DeepONet: provide the baseline p0 (normalized) as trunk channels.

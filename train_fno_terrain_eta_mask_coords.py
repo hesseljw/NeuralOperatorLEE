@@ -39,7 +39,10 @@ from torch.utils.data import Dataset, DataLoader
 # =============================================================================
 # Edit the values below for your machine / experiment.
 
-DATA_ROOT = Path("data") / "terrain_sobol_complex_n_1000"
+# Change this into the real dataset directory
+DATA_ROOT = "data_sample/terrain"
+
+
 DEVICE    = None   # "cuda" or "cpu" (if None, auto-pick)
 RUN_TAG   = "train_fno_terrain_eta_mask_coords_iid"
 
@@ -73,7 +76,7 @@ CFG: Dict[str, Any] = {
 
     # ---- Residual to flat baseline ----
     "use_flat_residual": False,
-    "flat_file": "deeponet_aux/flat_ground.h5",
+    "flat_file": "flat_ground.h5",
 
     # ---- (Optional) crop to safe window ----
     # If True, we crop BOTH case and flat baseline to [xmin,xmax] before residual.

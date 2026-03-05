@@ -54,8 +54,8 @@ Outputs
 
 """
 
-from __future__ import annotations
-from __future__ import annotations
+# from __future__ import annotations
+# from __future__ import annotations
 
 import json
 import time
@@ -77,7 +77,9 @@ from torch.utils.data import Dataset, DataLoader, Subset
 # The defaults below are intentionally easy to edit.
 # You can also override the most common options via CLI flags (see --help).
 
-DATA_ROOT = Path("data") / "wind_terrain_sobol_complex_perm_n_1000"
+# Change this into the real dataset directory
+DATA_ROOT = "data_sample/joint"
+
 RUN_TAG   = "fno_windterrain_u_eta_mask_coords_delta_iid"
 DEVICE    = None  # "cuda" or "cpu" (None -> auto)
 
