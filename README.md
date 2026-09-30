@@ -167,4 +167,21 @@ The fixed baseline $p_0$ is typically the “no wind + flat ground” case, stor
 
 ## Citation
 
-This repository accompanies the paper “Towards Neural-operator Surrogates for Outdoor Acoustics using Parameterized Wind Profiles and Terrain,” currently under review, hence not yet available for citation.
+For a detailed description of the methodology, including the LEE–FDTD data generation, wind and terrain parameterizations, neural-operator architectures, input/output representations, training strategies, and evaluation procedure, please see the accompanying paper:
+
+H. Juliust, S. Sionkala, A. Schady, and F. Dietrich,
+“Neural-operator surrogates for outdoor acoustics using parameterized wind and terrain profiles,”
+The Journal of the Acoustical Society of America, 160, 2653–2669 (2026).
+https://doi.org/10.1121/10.0046653
+
+If you use this repository, its code, or the associated methodology in your work, please cite:
+
+@article{Juliust2026NeuralOperator,
+  author  = {Juliust, Hessel and Sionkala, Sirine and Schady, Arthur and Dietrich, Felix},
+  title   = {Neural-operator surrogates for outdoor acoustics using parameterized wind and terrain profiles},
+  journal = {The Journal of the Acoustical Society of America},
+  volume  = {160},
+  pages   = {2653--2669},
+  year    = {2026},
+  doi     = {10.1121/10.0046653}
+}
